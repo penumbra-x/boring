@@ -98,6 +98,7 @@ pub use crate::ssl::connector::{
     ConnectConfiguration, SslAcceptor, SslAcceptorBuilder, SslConnector, SslConnectorBuilder,
 };
 pub use crate::ssl::error::{Error, ErrorCode, HandshakeError};
+pub use cert_compression::CertCompressionAlgorithm;
 
 mod bio;
 mod callbacks;

@@ -34,6 +34,8 @@ use crate::x509::store::X509StoreBuilder;
 use crate::x509::verify::X509CheckFlags;
 use crate::x509::{X509Name, X509StoreContext, X509VerifyResult, X509};
 
+use super::cert_compression::CertCompressionAlgorithm;
+
 mod server;
 
 static ROOT_CERT: &[u8] = include_bytes!("../../../test/root-ca.pem");
