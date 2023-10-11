@@ -3,9 +3,9 @@
 
 use crate::cache::{SessionCache, SessionKey};
 use antidote::Mutex;
-use boring::error::ErrorStack;
-use boring::ex_data::Index;
-use boring::ssl::{
+use boring_imp::error::ErrorStack;
+use boring_imp::ex_data::Index;
+use boring_imp::ssl::{
     ConnectConfiguration, Ssl, SslConnector, SslConnectorBuilder, SslMethod, SslSessionCacheMode,
 };
 use http::uri::Scheme;
@@ -24,7 +24,7 @@ use std::sync::Arc;
 use std::task::{Context, Poll};
 use std::{error::Error, fmt};
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
-use tokio_boring::SslStream;
+use tokio_boring_imp::SslStream;
 use tower_layer::Layer;
 
 mod cache;
@@ -244,7 +244,7 @@ where
             }
 
             let config = inner.setup_ssl(&uri, host)?;
-            let stream = tokio_boring::connect(config, host, conn).await?;
+            let stream = tokio_boring_imp::connect(config, host, conn).await?;
 
             Ok(MaybeHttpsStream::Https(stream))
         };

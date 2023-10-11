@@ -1,6 +1,6 @@
 [package]
-name = "boring-sys"
-version = "2.0.0"
+name = "boring-sys-imp"
+version = "2.0.1"
 authors = ["Alex Crichton <alex@alexcrichton.com>",
            "Steven Fackler <sfackler@gmail.com>",
            "Ivan Nikulin <ifaaan@gmail.com>"]

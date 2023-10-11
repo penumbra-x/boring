@@ -1,11 +1,11 @@
-use boring::ssl::{SslAcceptor, SslConnector, SslFiletype, SslMethod};
+use boring_imp::ssl::{SslAcceptor, SslConnector, SslFiletype, SslMethod};
 use futures::future;
 use std::future::Future;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::pin::Pin;
 use tokio::io::{AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio_boring::{HandshakeError, SslStream};
+use tokio_boring_imp::{HandshakeError, SslStream};
 
 #[tokio::test]
 async fn google() {
@@ -17,7 +17,7 @@ async fn google() {
         .build()
         .configure()
         .unwrap();
-    let mut stream = tokio_boring::connect(config, "google.com", stream)
+    let mut stream = tokio_boring_imp::connect(config, "google.com", stream)
         .await
         .unwrap();
 
@@ -56,7 +56,7 @@ fn create_server() -> (
 
         let stream = listener.accept().await.unwrap().0;
 
-        tokio_boring::accept(&acceptor, stream).await
+        tokio_boring_imp::accept(&acceptor, stream).await
     };
 
     (server, addr)
@@ -85,7 +85,7 @@ async fn server() {
         let config = connector.build().configure().unwrap();
 
         let stream = TcpStream::connect(&addr).await.unwrap();
-        let mut stream = tokio_boring::connect(config, "localhost", stream)
+        let mut stream = tokio_boring_imp::connect(config, "localhost", stream)
             .await
             .unwrap();
 
@@ -114,7 +114,7 @@ async fn handshake_error() {
         let config = connector.build().configure().unwrap();
         let stream = TcpStream::connect(&addr).await.unwrap();
 
-        let err = tokio_boring::connect(config, "localhost", stream)
+        let err = tokio_boring_imp::connect(config, "localhost", stream)
             .await
             .unwrap_err();
 

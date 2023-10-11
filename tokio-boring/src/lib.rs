@@ -12,11 +12,11 @@
 //! primarily done through the [`boring`] crate.
 #![warn(missing_docs)]
 
-use boring::ssl::{
+use boring_imp::ssl::{
     self, ConnectConfiguration, ErrorCode, MidHandshakeSslStream, ShutdownResult, SslAcceptor,
     SslRef,
 };
-use boring_sys as ffi;
+use boring_sys_imp as ffi;
 use std::error::Error;
 use std::fmt;
 use std::future::Future;
