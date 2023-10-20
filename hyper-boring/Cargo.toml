@@ -1,6 +1,6 @@
 [package]
 name = "hyper-boring-imp"
-version = "2.1.3"
+version = "2.1.4"
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 edition = "2018"
 description = "Hyper TLS support via BoringSSL"
@@ -19,7 +19,7 @@ fips = ["tokio-boring-imp/fips"]
 [dependencies]
 antidote = "1.0.0"
 http = "0.2"
-hyper = { package = "hyper_imp", version = "0.14.28", default-features = false, features = ["client"] }
+hyper = { package = "hyper_imp", version = "0.14.29", default-features = false, features = ["client"] }
 linked_hash_set = "0.1"
 once_cell = "1.0"
 boring-imp = { version = ">=1.1.0,<3.0.0", path = "../boring" }
