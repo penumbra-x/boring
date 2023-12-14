@@ -1,6 +1,6 @@
 [package]
 name = "boring-imp"
-version = "2.0.1"
+version = "2.0.2"
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 license = "Apache-2.0"
 description = "BoringSSL bindings"
@@ -13,6 +13,7 @@ edition = "2018"
 
 [dependencies]
 brotli = "3.3.0"
+flate2 = "1.0.28"
 bitflags = "1.0"
 foreign-types = "0.5"
 lazy_static = "1"
