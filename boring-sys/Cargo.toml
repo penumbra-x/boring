@@ -22,6 +22,7 @@ include = [
     "/deps/boringssl/**/CMakeLists.txt",
     "/deps/boringssl/**/sources.cmake",
     "/deps/boringssl/LICENSE",
+    "/patches",
     "/build.rs",
     "/src",
 ]
