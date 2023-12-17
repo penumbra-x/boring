@@ -19,7 +19,7 @@ fips = ["tokio-boring-imp/fips"]
 [dependencies]
 antidote = "1.0.0"
 http = "0.2.11"
-hyper = { package = "hyper_imp", version = "0.14.29", default-features = false, features = ["client"] }
+hyper = { package = "hyper_imp", version = "0.14.30", default-features = false, features = ["client"] }
 linked_hash_set = "0.1"
 once_cell = "1.0"
 boring-imp = { version = ">=1.1.0,<3.0.0", path = "../boring" }
@@ -28,6 +28,6 @@ tokio-boring-imp = { version = "2", path = "../tokio-boring" }
 tower-layer = "0.3"
 
 [dev-dependencies]
-hyper = { package = "hyper_imp", version = "0.14.28", features = ["full"] }
+hyper = { package = "hyper_imp", version = "0.14.30", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
