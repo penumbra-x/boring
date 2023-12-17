@@ -135,6 +135,8 @@ const BORING_SSL_PATH: &str = "deps/boringssl-fips";
 #[cfg(not(feature = "fips"))]
 const BORING_SSL_PATH: &str = "deps/boringssl";
 
+const PATCHES_PATH: &str = "patches";
+
 /// Returns a new cmake::Config for building BoringSSL.
 ///
 /// It will add platform-specific parameters if needed.
@@ -304,6 +306,65 @@ fn get_extra_clang_args_for_bindgen() -> Vec<String> {
     params
 }
 
+fn apply_patches() {
+    let patches = std::fs::read_dir(PATCHES_PATH).expect("failed to read patches directory");
+    for patch in patches {
+        if let Ok(patch_entry) = patch {
+            if let Some(ext) = patch_entry.path().extension() {
+                if ext == "patch" {
+                    let patch_abs_path =
+                        if let Ok(canonical_path) = std::fs::canonicalize(&patch_entry.path()) {
+                            canonical_path
+                        } else {
+                            panic!(
+                                "Failed to get canonical path for patch {:?}",
+                                patch_entry.path()
+                            );
+                        };
+
+                    // Check if the patch has already been applied by looking for a marker file or checking a condition
+                    let marker_file = Path::new(&BORING_SSL_PATH).join(format!(
+                        "{}.applied",
+                        patch_entry.file_name().to_string_lossy()
+                    ));
+                    if marker_file.exists() {
+                        println!(
+                            "Patch {:?} has already been applied. Skipping...",
+                            patch_entry.path()
+                        );
+                        continue;
+                    }
+
+                    // Apply the patch
+                    let status = Command::new("patch")
+                        .args(&[
+                            "-p1",
+                            "-d",
+                            BORING_SSL_PATH,
+                            "-i",
+                            patch_abs_path.to_str().unwrap(),
+                        ])
+                        .status();
+
+                    if let Ok(status) = status {
+                        if status.success() {
+                            // If the patch applied successfully, create a marker file to indicate it has been applied
+                            let _ = std::fs::write(marker_file, ""); // You can put any content or create an empty file
+                        } else {
+                            panic!("Failed to apply patch {:?}", patch_entry.path());
+                        }
+                    } else {
+                        panic!(
+                            "Failed to execute patch command for {:?}",
+                            patch_entry.path()
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn main() {
     use std::env;
 
@@ -324,7 +385,11 @@ fn main() {
             if !status.map_or(false, |status| status.success()) {
                 panic!("failed to fetch submodule - consider running `git submodule update --init --recursive deps/boringssl` yourself");
             }
+
         }
+
+        // apply patches
+        apply_patches();
 
         let mut cfg = get_boringssl_cmake_config();
 
