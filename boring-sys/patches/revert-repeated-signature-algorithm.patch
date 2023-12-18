@@ -1,0 +1,30 @@
+From 0a352247b06c299c9ed851f928f11dd963fa14cb Mon Sep 17 00:00:00 2001
+From: gngpp <gngppz@gmail.com>
+Date: Mon, 18 Dec 2023 13:11:24 +0800
+Subject: [PATCH] revert repeated signature algorithm
+
+---
+ src/ssl/ssl_privkey.cc | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/src/ssl/ssl_privkey.cc b/src/ssl/ssl_privkey.cc
+index 8462ebf00..3dcfe8716 100644
+--- a/src/ssl/ssl_privkey.cc
++++ b/src/ssl/ssl_privkey.cc
+@@ -584,13 +584,6 @@ static bool sigalgs_unique(Span<const uint16_t> in_sigalgs) {
+ 
+   qsort(sigalgs.data(), sigalgs.size(), sizeof(uint16_t), compare_uint16_t);
+ 
+-  for (size_t i = 1; i < sigalgs.size(); i++) {
+-    if (sigalgs[i - 1] == sigalgs[i]) {
+-      OPENSSL_PUT_ERROR(SSL, SSL_R_DUPLICATE_SIGNATURE_ALGORITHM);
+-      return false;
+-    }
+-  }
+-
+   return true;
+ }
+ 
+-- 
+2.37.1 (Apple Git-137.1)
+

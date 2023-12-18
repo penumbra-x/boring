@@ -136,6 +136,7 @@ const BORING_SSL_PATH: &str = "deps/boringssl-fips";
 const BORING_SSL_PATH: &str = "deps/boringssl";
 
 const PATCHES_PATH: &str = "patches";
+const PIN_COMMIT_PATH: &str = "pin_commit";
 
 /// Returns a new cmake::Config for building BoringSSL.
 ///
@@ -306,6 +307,32 @@ fn get_extra_clang_args_for_bindgen() -> Vec<String> {
     params
 }
 
+fn pin_commit() {
+    // pin to a specific commit
+    let commit = std::fs::read_to_string(PIN_COMMIT_PATH).unwrap();
+
+    let boringssl_path = if let Ok(canonical_path) = std::fs::canonicalize(BORING_SSL_PATH) {
+        canonical_path
+    } else {
+        panic!("Failed to get canonical path for patch {}", BORING_SSL_PATH);
+    };
+
+    // reset to the commit
+    let status = Command::new("git")
+        .args(&[
+            "-C",
+            boringssl_path.to_str().unwrap(),
+            "reset",
+            "--hard",
+            &commit,
+        ])
+        .status();
+
+    if !status.map_or(false, |status| status.success()) {
+        panic!("failed to reset to commit {}", commit);
+    }
+}
+
 fn apply_patches() {
     let patches = std::fs::read_dir(PATCHES_PATH).expect("failed to read patches directory");
     for patch in patches {
@@ -385,6 +412,9 @@ fn main() {
             if !status.map_or(false, |status| status.success()) {
                 panic!("failed to fetch submodule - consider running `git submodule update --init --recursive deps/boringssl` yourself");
             }
+
+            // pin to a specific commit
+            pin_commit();
 
         }
 
