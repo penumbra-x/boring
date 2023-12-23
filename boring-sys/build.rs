@@ -137,9 +137,7 @@ fn get_boringssl_platform_output_path() -> String {
 const BORING_SSL_PATH: &str = "deps/boringssl-fips";
 #[cfg(not(feature = "fips"))]
 const BORING_SSL_PATH: &str = "deps/boringssl";
-
 const PATCHES_PATH: &str = "patches";
-const PIN_COMMIT_PATH: &str = "pin_commit";
 
 /// Returns a new cmake::Config for building BoringSSL.
 ///
@@ -310,32 +308,6 @@ fn get_extra_clang_args_for_bindgen() -> Vec<String> {
     params
 }
 
-fn pin_commit() {
-    // pin to a specific commit
-    let commit = std::fs::read_to_string(PIN_COMMIT_PATH).unwrap();
-
-    let boringssl_path = if let Ok(canonical_path) = std::fs::canonicalize(BORING_SSL_PATH) {
-        canonical_path
-    } else {
-        panic!("Failed to get canonical path for patch {}", BORING_SSL_PATH);
-    };
-
-    // reset to the commit
-    let status = Command::new("git")
-        .args(&[
-            "-C",
-            boringssl_path.to_str().unwrap(),
-            "reset",
-            "--hard",
-            &commit,
-        ])
-        .status();
-
-    if !status.map_or(false, |status| status.success()) {
-        panic!("failed to reset to commit {}", commit);
-    }
-}
-
 fn apply_patches() {
     let patches = std::fs::read_dir(PATCHES_PATH).expect("failed to read patches directory");
     for patch in patches {
@@ -366,14 +338,9 @@ fn apply_patches() {
                     }
 
                     // Apply the patch
-                    let status = Command::new("patch")
-                        .args(&[
-                            "-p1",
-                            "-d",
-                            BORING_SSL_PATH,
-                            "-i",
-                            patch_abs_path.to_str().unwrap(),
-                        ])
+                    let status = Command::new("git")
+                        .args(&["apply", &adjust_canonicalization(&patch_abs_path)])
+                        .current_dir(BORING_SSL_PATH)
                         .status();
 
                     if let Ok(status) = status {
@@ -391,6 +358,26 @@ fn apply_patches() {
                     }
                 }
             }
+        }
+    }
+}
+
+fn adjust_canonicalization<P: AsRef<Path>>(p: P) -> String {
+    // On non-Windows platforms, canonicalization is done by `git apply` and `git apply` expects
+    #[cfg(not(target_os = "windows"))]
+    {
+        p.as_ref().display().to_string()
+    }
+
+    // On Windows, canonicalization is done by `git apply` and `git apply` expects
+    #[cfg(target_os = "windows")]
+    {
+        const VERBATIM_PREFIX: &str = r#"\\?\"#;
+        let p = p.as_ref().display().to_string();
+        if p.starts_with(VERBATIM_PREFIX) {
+            p[VERBATIM_PREFIX.len()..].to_string()
+        } else {
+            p
         }
     }
 }
@@ -415,10 +402,6 @@ fn main() {
             if !status.map_or(false, |status| status.success()) {
                 panic!("failed to fetch submodule - consider running `git submodule update --init --recursive deps/boringssl` yourself");
             }
-
-            // pin to a specific commit
-            pin_commit();
-
         }
 
         // apply patches
