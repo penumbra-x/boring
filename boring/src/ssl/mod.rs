@@ -1173,7 +1173,7 @@ impl SslContextBuilder {
             let r = ffi::SSL_CTX_set_alpn_protos(
                 self.as_ptr(),
                 protocols.as_ptr(),
-                (protocols.len() as c_uint).try_into().unwrap(),
+                protocols.len() as ProtosLen,
             );
             // fun fact, SSL_CTX_set_alpn_protos has a reversed return code D:
             if r == 0 {
@@ -1792,6 +1792,11 @@ impl SslContextRef {
     }
 }
 
+#[cfg(not(feature = "fips"))]
+type ProtosLen = usize;
+#[cfg(feature = "fips")]
+type ProtosLen = libc::c_uint;
+
 /// Information about the state of a cipher.
 pub struct CipherBits {
     /// The number of secret bits used for the cipher.
@@ -2294,7 +2299,7 @@ impl SslRef {
             let r = ffi::SSL_set_alpn_protos(
                 self.as_ptr(),
                 protocols.as_ptr(),
-                (protocols.len() as c_uint).try_into().unwrap(),
+                protocols.len() as ProtosLen,
             );
             // fun fact, SSL_set_alpn_protos has a reversed return code D:
             if r == 0 {

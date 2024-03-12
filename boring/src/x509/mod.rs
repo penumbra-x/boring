@@ -818,7 +818,7 @@ impl X509NameBuilder {
                 field.as_ptr() as *mut _,
                 ffi::MBSTRING_UTF8,
                 value.as_ptr(),
-                (value.len() as c_int).try_into().unwrap(),
+                value.len() as ValueLen,
                 -1,
                 0,
             ))
@@ -839,7 +839,7 @@ impl X509NameBuilder {
                 field.as_raw(),
                 ffi::MBSTRING_UTF8,
                 value.as_ptr() as *mut _,
-                (value.len() as c_int).try_into().unwrap(),
+                value.len() as ValueLen,
                 -1,
                 0,
             ))
@@ -852,6 +852,11 @@ impl X509NameBuilder {
         self.0
     }
 }
+
+#[cfg(not(feature = "fips"))]
+type ValueLen = isize;
+#[cfg(feature = "fips")]
+type ValueLen = i32;
 
 foreign_type_and_impl_send_sync! {
     type CType = ffi::X509_NAME;
