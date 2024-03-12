@@ -339,7 +339,11 @@ fn apply_patches() {
 
                     // Apply the patch
                     let status = Command::new("git")
-                        .args(&["apply", &adjust_canonicalization(&patch_abs_path)])
+                        .args(&[
+                            "apply",
+                            "--whitespace=nowarn",
+                            &adjust_canonicalization(&patch_abs_path),
+                        ])
                         .current_dir(BORING_SSL_PATH)
                         .status();
 
