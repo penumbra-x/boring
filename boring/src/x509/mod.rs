@@ -818,7 +818,7 @@ impl X509NameBuilder {
                 field.as_ptr() as *mut _,
                 ffi::MBSTRING_UTF8,
                 value.as_ptr(),
-                value.len() as c_int,
+                (value.len() as c_int).try_into().unwrap(),
                 -1,
                 0,
             ))
@@ -839,7 +839,7 @@ impl X509NameBuilder {
                 field.as_raw(),
                 ffi::MBSTRING_UTF8,
                 value.as_ptr() as *mut _,
-                value.len() as c_int,
+                (value.len() as c_int).try_into().unwrap(),
                 -1,
                 0,
             ))

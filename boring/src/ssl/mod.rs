@@ -627,8 +627,6 @@ impl SslCurve {
     pub const SECP521R1: SslCurve = SslCurve(ffi::NID_secp521r1);
 
     pub const X25519: SslCurve = SslCurve(ffi::NID_X25519);
-
-    pub const CECPQ2: SslCurve = SslCurve(ffi::NID_CECPQ2);
 }
 
 /// A standard implementation of protocol selection for Application Layer Protocol Negotiation
@@ -1175,7 +1173,7 @@ impl SslContextBuilder {
             let r = ffi::SSL_CTX_set_alpn_protos(
                 self.as_ptr(),
                 protocols.as_ptr(),
-                protocols.len() as c_uint,
+                (protocols.len() as c_uint).try_into().unwrap(),
             );
             // fun fact, SSL_CTX_set_alpn_protos has a reversed return code D:
             if r == 0 {
@@ -2296,7 +2294,7 @@ impl SslRef {
             let r = ffi::SSL_set_alpn_protos(
                 self.as_ptr(),
                 protocols.as_ptr(),
-                protocols.len() as c_uint,
+                (protocols.len() as c_uint).try_into().unwrap(),
             );
             // fun fact, SSL_set_alpn_protos has a reversed return code D:
             if r == 0 {

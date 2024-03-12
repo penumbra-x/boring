@@ -1,6 +1,7 @@
 use crate::ffi;
 use crate::ffi::BIO_new_mem_buf;
 use libc::c_int;
+use std::convert::TryInto;
 use std::marker::PhantomData;
 use std::ptr;
 use std::slice;
@@ -26,7 +27,7 @@ impl<'a> MemBioSlice<'a> {
         let bio = unsafe {
             cvt_p(BIO_new_mem_buf(
                 buf.as_ptr() as *const _,
-                buf.len() as c_int,
+                (buf.len() as c_int).try_into().unwrap(),
             ))?
         };
 
