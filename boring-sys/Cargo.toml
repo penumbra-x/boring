@@ -1,6 +1,6 @@
 [package]
 name = "boring-sys-imp"
-version = "2.0.6"
+version = "2.1.0"
 authors = ["Alex Crichton <alex@alexcrichton.com>",
            "Steven Fackler <sfackler@gmail.com>",
            "Ivan Nikulin <ifaaan@gmail.com>"]
@@ -30,11 +30,9 @@ include = [
 
 [build-dependencies]
 bindgen = { version = "0.69.1", default-features = false, features = ["runtime"], optional = true }
-old_bindgen = { package = "bindgen", version = "0.60.1", default-features = false, features = ["runtime"], optional = true }
 cmake = "0.1"
 
 [features]
 default = ["dep:bindgen"]
-old_bindgen = ["dep:old_bindgen"]
 # Use a FIPS-validated version of boringssl.
 fips = []
