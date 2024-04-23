@@ -105,10 +105,12 @@ pub use self::connector::{
     ConnectConfiguration, SslAcceptor, SslAcceptorBuilder, SslConnector, SslConnectorBuilder,
 };
 pub use self::error::{Error, ErrorCode, HandshakeError};
+pub use cert_compression::CertCompressionAlgorithm;
 
 mod async_callbacks;
 mod bio;
 mod callbacks;
+mod cert_compression;
 mod connector;
 mod error;
 mod mut_only;
