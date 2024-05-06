@@ -627,6 +627,8 @@ impl SslCurve {
     pub const SECP521R1: SslCurve = SslCurve(ffi::NID_secp521r1);
 
     pub const X25519: SslCurve = SslCurve(ffi::NID_X25519);
+
+    pub const X25519_KYBER768_DRAFT00: SslCurve = SslCurve(ffi::NID_X25519Kyber768Draft00);
 }
 
 /// A standard implementation of protocol selection for Application Layer Protocol Negotiation
