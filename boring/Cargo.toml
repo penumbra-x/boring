@@ -1,6 +1,6 @@
 [package]
 name = "boring-imp"
-version = "2.1.0"
+version = "2.1.1"
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 license = "Apache-2.0"
 description = "BoringSSL bindings"
