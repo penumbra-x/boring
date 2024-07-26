@@ -187,6 +187,16 @@ where
     {
         self.inner.callback = Some(Arc::new(callback));
     }
+
+    /// Configures the SSL context for a given URI.
+    pub fn configure_and_setup(
+        &self,
+        uri: &Uri,
+        host: &str,
+    ) -> Result<ConnectConfiguration, ErrorStack> {
+        let conf = self.inner.setup_ssl(uri, host)?;
+        Ok(conf)
+    }
 }
 
 impl<S> Service<Uri> for HttpsConnector<S>
