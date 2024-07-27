@@ -49,6 +49,11 @@ pub struct SessionCache {
 }
 
 impl SessionCache {
+    /// Create a new SessionCache with a default capacity of 8.
+    pub fn new() -> SessionCache {
+        SessionCache::with_capacity(8)
+    }
+
     /// Create a new SessionCache with a given capacity.
     pub fn with_capacity(per_key_session_capacity: usize) -> SessionCache {
         SessionCache {
