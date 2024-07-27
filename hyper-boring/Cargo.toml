@@ -1,6 +1,6 @@
 [package]
 name = "hyper-boring-imp"
-version = "2.2.0"
+version = "2.2.1"
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 edition = "2018"
 description = "Hyper TLS support via BoringSSL"
