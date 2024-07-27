@@ -192,7 +192,7 @@ where
     /// Creates a new `HttpsConnector` with default settings.
     ///
     /// ALPN is configured to support both HTTP/1 and HTTP/1.1.
-    pub fn with_connecotr_and_cache(
+    pub fn with_connector_and_cache(
         http: S,
         ssl: SslConnectorBuilder,
         cache: Arc<Mutex<SessionCache>>,
