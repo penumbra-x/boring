@@ -5,9 +5,12 @@ use std::borrow::Borrow;
 use std::collections::hash_map::{Entry, HashMap};
 use std::hash::{Hash, Hasher};
 
+/// A key for a session in the cache.
 #[derive(Hash, PartialEq, Eq, Clone)]
 pub struct SessionKey {
+    /// The host and port are used to identify the server.
     pub host: String,
+    /// The port is used to identify the server.
     pub port: u16,
 }
 
@@ -37,12 +40,14 @@ impl Borrow<[u8]> for HashSession {
     }
 }
 
+/// SSL session cache.
 pub struct SessionCache {
     sessions: HashMap<SessionKey, LinkedHashSet<HashSession>>,
     reverse: HashMap<HashSession, SessionKey>,
 }
 
 impl SessionCache {
+    /// Create a new session cache.
     pub fn new() -> SessionCache {
         SessionCache {
             sessions: HashMap::new(),
@@ -50,6 +55,7 @@ impl SessionCache {
         }
     }
 
+    /// Insert a session into the cache.
     pub fn insert(&mut self, key: SessionKey, session: SslSession) {
         let session = HashSession(session);
 
@@ -60,6 +66,7 @@ impl SessionCache {
         self.reverse.insert(session, key);
     }
 
+    /// Get a session from the cache.
     pub fn get(&mut self, key: &SessionKey) -> Option<SslSession> {
         let session = {
             let sessions = self.sessions.get_mut(key)?;
@@ -76,6 +83,7 @@ impl SessionCache {
         Some(session)
     }
 
+    /// Remove a session from the cache.
     pub fn remove(&mut self, session: &SslSessionRef) {
         let key = match self.reverse.remove(session.id()) {
             Some(key) => key,

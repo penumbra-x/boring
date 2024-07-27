@@ -1,7 +1,7 @@
 //! Hyper SSL support via OpenSSL.
 #![warn(missing_docs)]
 
-use crate::cache::{SessionCache, SessionKey};
+pub use crate::cache::{SessionCache, SessionKey};
 use antidote::Mutex;
 use boring_imp::error::ErrorStack;
 use boring_imp::ex_data::Index;
@@ -92,9 +92,18 @@ impl HttpsLayer {
     /// Creates a new `HttpsLayer`.
     ///
     /// The session cache configuration of `ssl` will be overwritten.
-    pub fn with_connector(mut ssl: SslConnectorBuilder) -> Result<HttpsLayer, ErrorStack> {
-        let cache = Arc::new(Mutex::new(SessionCache::new()));
+    pub fn with_connector(ssl: SslConnectorBuilder) -> Result<HttpsLayer, ErrorStack> {
+        Self::with_connector_and_cache(ssl, Arc::new(Mutex::new(SessionCache::new())))
+    }
 
+    /// Creates a new `HttpsLayer` with a custom session cache.
+    ///
+    /// The session cache configuration of `ssl` will be overwritten.
+    /// The session cache is shared between all connections.
+    pub fn with_connector_and_cache(
+        mut ssl: SslConnectorBuilder,
+        cache: Arc<Mutex<SessionCache>>,
+    ) -> Result<HttpsLayer, ErrorStack> {
         ssl.set_session_cache_mode(SslSessionCacheMode::CLIENT);
 
         ssl.set_new_session_callback({
@@ -178,6 +187,17 @@ where
         ssl: SslConnectorBuilder,
     ) -> Result<HttpsConnector<S>, ErrorStack> {
         HttpsLayer::with_connector(ssl).map(|l| l.layer(http))
+    }
+
+    /// Creates a new `HttpsConnector` with default settings.
+    ///
+    /// ALPN is configured to support both HTTP/1 and HTTP/1.1.
+    pub fn with_connecotr_and_cache(
+        http: S,
+        ssl: SslConnectorBuilder,
+        cache: Arc<Mutex<SessionCache>>,
+    ) -> Result<HttpsConnector<S>, ErrorStack> {
+        HttpsLayer::with_connector_and_cache(ssl, cache).map(|l| l.layer(http))
     }
 
     /// Registers a callback which can customize the configuration of each connection.
