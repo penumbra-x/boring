@@ -93,7 +93,7 @@ impl HttpsLayer {
     ///
     /// The session cache configuration of `ssl` will be overwritten.
     pub fn with_connector(ssl: SslConnectorBuilder) -> Result<HttpsLayer, ErrorStack> {
-        Self::with_connector_and_cache(ssl, Arc::new(Mutex::new(SessionCache::new())))
+        Self::with_connector_and_cache(ssl, Arc::new(Mutex::new(SessionCache::with_capacity(8))))
     }
 
     /// Creates a new `HttpsLayer` with a custom session cache.
