@@ -1,8 +1,8 @@
 //! Hyper SSL support via OpenSSL.
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-
-use crate::cache::{SessionCache, SessionKey};
+#![allow(missing_docs)]
+pub use crate::cache::{SessionCache, SessionKey};
 use antidote::Mutex;
 use boring::error::ErrorStack;
 use boring::ex_data::Index;
@@ -90,6 +90,7 @@ pub struct HttpsLayer {
 /// Settings for [`HttpsLayer`]
 pub struct HttpsLayerSettings {
     session_cache_capacity: usize,
+    session_cache: Option<Arc<Mutex<SessionCache>>>,
 }
 
 impl HttpsLayerSettings {
@@ -103,6 +104,7 @@ impl Default for HttpsLayerSettings {
     fn default() -> Self {
         Self {
             session_cache_capacity: 8,
+            session_cache: None,
         }
     }
 }
@@ -115,6 +117,11 @@ impl HttpsLayerSettingsBuilder {
     /// Defaults to 8.
     pub fn set_session_cache_capacity(&mut self, capacity: usize) {
         self.0.session_cache_capacity = capacity;
+    }
+
+    /// Sets the session cache to use. Defaults to an empty cache.
+    pub fn set_session_cache(&mut self, cache: Arc<Mutex<SessionCache>>) {
+        self.0.session_cache = Some(cache);
     }
 
     /// Consumes the builder, returning a new [`HttpsLayerSettings`]
@@ -147,9 +154,11 @@ impl HttpsLayer {
         mut ssl: SslConnectorBuilder,
         settings: HttpsLayerSettings,
     ) -> Result<HttpsLayer, ErrorStack> {
-        let cache = Arc::new(Mutex::new(SessionCache::with_capacity(
-            settings.session_cache_capacity,
-        )));
+        let cache = settings.session_cache.unwrap_or_else(|| {
+            Arc::new(Mutex::new(SessionCache::with_capacity(
+                settings.session_cache_capacity,
+            )))
+        });
 
         ssl.set_session_cache_mode(SslSessionCacheMode::CLIENT);
 
