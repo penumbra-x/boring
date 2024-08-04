@@ -1972,16 +1972,13 @@ impl SslContextBuilder {
     // when the flags are used, the preferences are set just before connecting or accepting.
     #[cfg(not(feature = "kx-safe-default"))]
     pub fn set_curves(&mut self, curves: &[SslCurve]) -> Result<(), ErrorStack> {
-        let mut nid_curves = Vec::with_capacity(curves.len());
-        for curve in curves {
-            nid_curves.push(curve.nid())
-        }
+        let curves: Vec<i32> = curves.iter().filter_map(|curve| curve.nid()).collect();
 
         unsafe {
             cvt_0i(ffi::SSL_CTX_set1_curves(
                 self.as_ptr(),
-                nid_curves.as_ptr() as *const _,
-                nid_curves.len(),
+                curves.as_ptr() as *const _,
+                curves.len(),
             ))
             .map(|_| ())
         }
@@ -1996,6 +1993,26 @@ impl SslContextBuilder {
     #[cfg(not(feature = "fips"))]
     pub fn set_compliance_policy(&mut self, policy: CompliancePolicy) -> Result<(), ErrorStack> {
         unsafe { cvt_0i(ffi::SSL_CTX_set_compliance_policy(self.as_ptr(), policy.0)).map(|_| ()) }
+    }
+
+    /// Sets whether a certificate compression algorithm should be used.
+    ///
+    /// This corresponds to [`SSL_CTX_add_cert_compression_alg`]
+    ///
+    /// [`SSL_CTX_add_cert_compression_alg`]: https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#SSL_CTX_add_cert_compression_alg
+    pub fn add_cert_compression_alg(
+        &mut self,
+        algorithm: CertCompressionAlgorithm,
+    ) -> Result<(), ErrorStack> {
+        unsafe {
+            cvt_0i(ffi::SSL_CTX_add_cert_compression_alg(
+                self.as_ptr(),
+                algorithm as _,
+                algorithm.compression_fn(),
+                algorithm.decompression_fn(),
+            ))
+            .map(|_| ())
+        }
     }
 
     /// Consumes the builder, returning a new `SslContext`.
