@@ -1,5 +1,5 @@
 [package]
-name = "boring"
+name = "boring-imp"
 version = { workspace = true }
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 license = "Apache-2.0"
@@ -68,7 +68,7 @@ kx-client-nist-required = ["kx-safe-default"]
 [dependencies]
 bitflags = { workspace = true }
 foreign-types = { workspace = true }
-once_cell = { workspace = true }
+once_cell = { workspace = true}
 libc = { workspace = true }
 boring-sys = { workspace = true }
 brotli ={ workspace = true }
