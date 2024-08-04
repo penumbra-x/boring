@@ -1,3 +1,5 @@
+use tokio_boring_imp as tokio_boring;
+
 use boring::ssl::{SslConnector, SslMethod};
 use futures::future;
 use std::net::ToSocketAddrs;

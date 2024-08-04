@@ -1,5 +1,6 @@
 use boring::ssl;
 use tokio::net::TcpListener;
+use tokio_boring_imp as tokio_boring;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

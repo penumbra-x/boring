@@ -526,62 +526,52 @@ fn apply_patch(config: &Config, patch_name: &str) -> io::Result<()> {
     Ok(())
 }
 
-const PATCHES_PATH: &str = "patches";
+const OLD_CIPHER_PATCHE_PATH: &str = "patches/boringssl-old-ciphers.patch";
 const BORING_SSL_PATH: &str = "deps/boringssl";
 
 fn apply_old_cipher_patches() {
-    let patches = std::fs::read_dir(PATCHES_PATH).expect("failed to read patches directory");
-    for patch in patches {
-        if let Ok(patch_entry) = patch {
-            if let Some(ext) = patch_entry.path().extension() {
-                if ext == "patch" {
-                    let patch_abs_path =
-                        if let Ok(canonical_path) = std::fs::canonicalize(&patch_entry.path()) {
-                            canonical_path
-                        } else {
-                            panic!(
-                                "Failed to get canonical path for patch {:?}",
-                                patch_entry.path()
-                            );
-                        };
+    let patch_file = Path::new(OLD_CIPHER_PATCHE_PATH);
+    if let Some(ext) = patch_file.extension() {
+        if ext == "patch" {
+            let patch_abs_path = if let Ok(canonical_path) = std::fs::canonicalize(&patch_file) {
+                canonical_path
+            } else {
+                panic!("Failed to get canonical path for patch {:?}", patch_file);
+            };
 
-                    // Check if the patch has already been applied by looking for a marker file or checking a condition
-                    let marker_file = Path::new(&BORING_SSL_PATH).join(format!(
-                        "{}.applied",
-                        patch_entry.file_name().to_string_lossy()
-                    ));
-                    if marker_file.exists() {
-                        println!(
-                            "Patch {:?} has already been applied. Skipping...",
-                            patch_entry.path()
-                        );
-                        continue;
-                    }
+            // Check if the patch has already been applied by looking for a marker file or checking a condition
+            let marker_file = Path::new(&BORING_SSL_PATH).join(format!(
+                "{}.applied",
+                patch_file.file_name().unwrap().to_str().unwrap()
+            ));
+            if marker_file.exists() {
+                println!(
+                    "Patch {:?} has already been applied. Skipping...",
+                    marker_file
+                );
 
-                    // Apply the patch
-                    let status = Command::new("git")
-                        .args(&[
-                            "apply",
-                            "--whitespace=nowarn",
-                            &adjust_canonicalization(&patch_abs_path),
-                        ])
-                        .current_dir(BORING_SSL_PATH)
-                        .status();
+                return;
+            }
 
-                    if let Ok(status) = status {
-                        if status.success() {
-                            // If the patch applied successfully, create a marker file to indicate it has been applied
-                            let _ = std::fs::write(marker_file, ""); // You can put any content or create an empty file
-                        } else {
-                            panic!("Failed to apply patch {:?}", patch_entry.path());
-                        }
-                    } else {
-                        panic!(
-                            "Failed to execute patch command for {:?}",
-                            patch_entry.path()
-                        );
-                    }
+            // Apply the patch
+            let status = Command::new("git")
+                .args(&[
+                    "apply",
+                    "--whitespace=nowarn",
+                    &adjust_canonicalization(&patch_abs_path),
+                ])
+                .current_dir(BORING_SSL_PATH)
+                .status();
+
+            if let Ok(status) = status {
+                if status.success() {
+                    // If the patch applied successfully, create a marker file to indicate it has been applied
+                    let _ = std::fs::write(marker_file, "");
+                } else {
+                    panic!("Failed to apply patch {:?}", patch_file);
                 }
+            } else {
+                panic!("Failed to execute patch command for {:?}", patch_file);
             }
         }
     }
