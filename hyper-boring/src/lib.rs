@@ -253,6 +253,11 @@ where
         HttpsLayer::with_connector(ssl).map(|l| l.layer(http))
     }
 
+    /// Configures the SSL context for a given URI.
+    pub fn setup_ssl(&self, uri: &Uri, host: &str) -> Result<Ssl, ErrorStack> {
+        self.inner.setup_ssl(uri, host)
+    }
+
     /// Registers a callback which can customize the configuration of each connection.
     ///
     /// Unsuitable to change verify hostflags (with `config.param_mut().set_hostflags(…)`),
