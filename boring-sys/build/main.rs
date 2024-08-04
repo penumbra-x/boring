@@ -481,6 +481,8 @@ fn ensure_patches_applied(config: &Config) -> io::Result<()> {
         run_command(Command::new("git").arg("init").current_dir(src_path))?;
     }
 
+    apply_old_cipher_patches();
+
     if config.features.pq_experimental {
         println!("cargo:warning=applying experimental post quantum crypto patch to boringssl");
         apply_patch(config, "boring-pq.patch")?;
@@ -522,6 +524,87 @@ fn apply_patch(config: &Config, patch_name: &str) -> io::Result<()> {
     )?;
 
     Ok(())
+}
+
+const PATCHES_PATH: &str = "patches";
+const BORING_SSL_PATH: &str = "deps/boringssl";
+
+fn apply_old_cipher_patches() {
+    let patches = std::fs::read_dir(PATCHES_PATH).expect("failed to read patches directory");
+    for patch in patches {
+        if let Ok(patch_entry) = patch {
+            if let Some(ext) = patch_entry.path().extension() {
+                if ext == "patch" {
+                    let patch_abs_path =
+                        if let Ok(canonical_path) = std::fs::canonicalize(&patch_entry.path()) {
+                            canonical_path
+                        } else {
+                            panic!(
+                                "Failed to get canonical path for patch {:?}",
+                                patch_entry.path()
+                            );
+                        };
+
+                    // Check if the patch has already been applied by looking for a marker file or checking a condition
+                    let marker_file = Path::new(&BORING_SSL_PATH).join(format!(
+                        "{}.applied",
+                        patch_entry.file_name().to_string_lossy()
+                    ));
+                    if marker_file.exists() {
+                        println!(
+                            "Patch {:?} has already been applied. Skipping...",
+                            patch_entry.path()
+                        );
+                        continue;
+                    }
+
+                    // Apply the patch
+                    let status = Command::new("git")
+                        .args(&[
+                            "apply",
+                            "--whitespace=nowarn",
+                            &adjust_canonicalization(&patch_abs_path),
+                        ])
+                        .current_dir(BORING_SSL_PATH)
+                        .status();
+
+                    if let Ok(status) = status {
+                        if status.success() {
+                            // If the patch applied successfully, create a marker file to indicate it has been applied
+                            let _ = std::fs::write(marker_file, ""); // You can put any content or create an empty file
+                        } else {
+                            panic!("Failed to apply patch {:?}", patch_entry.path());
+                        }
+                    } else {
+                        panic!(
+                            "Failed to execute patch command for {:?}",
+                            patch_entry.path()
+                        );
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn adjust_canonicalization<P: AsRef<Path>>(p: P) -> String {
+    // On non-Windows platforms, canonicalization is done by `git apply` and `git apply` expects
+    #[cfg(not(target_os = "windows"))]
+    {
+        p.as_ref().display().to_string()
+    }
+
+    // On Windows, canonicalization is done by `git apply` and `git apply` expects
+    #[cfg(target_os = "windows")]
+    {
+        const VERBATIM_PREFIX: &str = r#"\\?\"#;
+        let p = p.as_ref().display().to_string();
+        if p.starts_with(VERBATIM_PREFIX) {
+            p[VERBATIM_PREFIX.len()..].to_string()
+        } else {
+            p
+        }
+    }
 }
 
 fn run_command(command: &mut Command) -> io::Result<Output> {
