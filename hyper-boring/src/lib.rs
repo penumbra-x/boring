@@ -115,13 +115,15 @@ pub struct HttpsLayerSettingsBuilder(HttpsLayerSettings);
 impl HttpsLayerSettingsBuilder {
     /// Sets maximum number of sessions to cache. Session capacity is per session key (domain).
     /// Defaults to 8.
-    pub fn set_session_cache_capacity(&mut self, capacity: usize) {
+    pub fn session_cache_capacity(mut self, capacity: usize) -> Self {
         self.0.session_cache_capacity = capacity;
+        self
     }
 
     /// Sets the session cache to use. Defaults to an empty cache.
-    pub fn set_session_cache(&mut self, cache: Arc<Mutex<SessionCache>>) {
+    pub fn session_cache(mut self, cache: Arc<Mutex<SessionCache>>) -> Self {
         self.0.session_cache = Some(cache);
+        self
     }
 
     /// Consumes the builder, returning a new [`HttpsLayerSettings`]
