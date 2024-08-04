@@ -253,6 +253,17 @@ where
         HttpsLayer::with_connector(ssl).map(|l| l.layer(http))
     }
 
+    /// Creates a new `HttpsConnector` with settings
+    ///
+    /// The session cache configuration of `ssl` will be overwritten.
+    pub fn with_connector_and_settings(
+        http: S,
+        ssl: SslConnectorBuilder,
+        settings: HttpsLayerSettings,
+    ) -> Result<HttpsConnector<S>, ErrorStack> {
+        HttpsLayer::with_connector_and_settings(ssl, settings).map(|l| l.layer(http))
+    }
+
     /// Configures the SSL context for a given URI.
     pub fn setup_ssl(&self, uri: &Uri, host: &str) -> Result<Ssl, ErrorStack> {
         self.inner.setup_ssl(uri, host)
