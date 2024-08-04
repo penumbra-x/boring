@@ -115,13 +115,15 @@ pub struct HttpsLayerSettingsBuilder(HttpsLayerSettings);
 impl HttpsLayerSettingsBuilder {
     /// Sets maximum number of sessions to cache. Session capacity is per session key (domain).
     /// Defaults to 8.
-    pub fn set_session_cache_capacity(&mut self, capacity: usize) {
+    pub fn session_cache_capacity(mut self, capacity: usize) -> Self {
         self.0.session_cache_capacity = capacity;
+        self
     }
 
     /// Sets the session cache to use. Defaults to an empty cache.
-    pub fn set_session_cache(&mut self, cache: Arc<Mutex<SessionCache>>) {
+    pub fn session_cache(mut self, cache: Arc<Mutex<SessionCache>>) -> Self {
         self.0.session_cache = Some(cache);
+        self
     }
 
     /// Consumes the builder, returning a new [`HttpsLayerSettings`]
@@ -251,6 +253,22 @@ where
         ssl: SslConnectorBuilder,
     ) -> Result<HttpsConnector<S>, ErrorStack> {
         HttpsLayer::with_connector(ssl).map(|l| l.layer(http))
+    }
+
+    /// Creates a new `HttpsConnector` with settings
+    ///
+    /// The session cache configuration of `ssl` will be overwritten.
+    pub fn with_connector_and_settings(
+        http: S,
+        ssl: SslConnectorBuilder,
+        settings: HttpsLayerSettings,
+    ) -> Result<HttpsConnector<S>, ErrorStack> {
+        HttpsLayer::with_connector_and_settings(ssl, settings).map(|l| l.layer(http))
+    }
+
+    /// Configures the SSL context for a given URI.
+    pub fn setup_ssl(&self, uri: &Uri, host: &str) -> Result<Ssl, ErrorStack> {
+        self.inner.setup_ssl(uri, host)
     }
 
     /// Registers a callback which can customize the configuration of each connection.
