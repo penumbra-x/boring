@@ -504,11 +504,7 @@ fn ensure_patches_applied(config: &Config) -> io::Result<()> {
 
 fn apply_patch(config: &Config, patch_name: &str) -> io::Result<()> {
     let src_path = get_boringssl_source_path(config);
-    let cmd_path = config
-        .manifest_dir
-        .join("patches")
-        .join(patch_name)
-        .canonicalize()?;
+    let cmd_path = config.manifest_dir.join("patches").join(patch_name);
 
     let mut args = vec!["apply", "-v", "--whitespace=fix"];
 
