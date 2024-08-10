@@ -1,7 +1,7 @@
 //! A program that generates ca certs, certs verified by the ca, and public
 //! and private keys.
 
-extern crate boring_imp as boring;
+extern crate boring_patch as boring;
 
 use boring::asn1::Asn1Time;
 use boring::bn::{BigNum, MsbOption};

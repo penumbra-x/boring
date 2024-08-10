@@ -1,4 +1,4 @@
-use tokio_boring_imp as tokio_boring;
+use tokio_boring_patch as tokio_boring;
 
 use boring::ssl::{SslConnector, SslMethod};
 use futures::future;
