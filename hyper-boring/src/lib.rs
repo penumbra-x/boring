@@ -92,6 +92,7 @@ pub struct HttpsLayer {
 /// Settings for [`HttpsLayer`]
 pub struct HttpsLayerSettings {
     session_cache_capacity: usize,
+    session_cache_mode: Option<SslSessionCacheMode>,
 }
 
 impl HttpsLayerSettings {
@@ -105,6 +106,7 @@ impl Default for HttpsLayerSettings {
     fn default() -> Self {
         Self {
             session_cache_capacity: 8,
+            session_cache_mode: None,
         }
     }
 }
@@ -117,6 +119,12 @@ impl HttpsLayerSettingsBuilder {
     /// Defaults to 8.
     pub fn session_cache_capacity(mut self, capacity: usize) -> Self {
         self.0.session_cache_capacity = capacity;
+        self
+    }
+
+    /// Sets the session cache mode. Defaults to `SslSessionCacheMode::CLIENT`.
+    pub fn session_cache_mode(mut self, mode: SslSessionCacheMode) -> Self {
+        self.0.session_cache_mode = Some(mode);
         self
     }
 
@@ -154,7 +162,11 @@ impl HttpsLayer {
             settings.session_cache_capacity,
         )));
 
-        ssl.set_session_cache_mode(SslSessionCacheMode::CLIENT);
+        ssl.set_session_cache_mode(
+            settings
+                .session_cache_mode
+                .unwrap_or_else(|| SslSessionCacheMode::CLIENT),
+        );
 
         ssl.set_new_session_callback({
             let cache = cache.clone();
@@ -169,22 +181,6 @@ impl HttpsLayer {
             inner: Inner {
                 ssl: ssl.build(),
                 cache: Some(cache),
-                callback: None,
-                ssl_callback: None,
-            },
-        })
-    }
-
-    /// Creates a new `HttpsLayer` and disables session caching.
-    pub fn with_connector_and_no_cache(
-        mut ssl: SslConnectorBuilder,
-    ) -> Result<HttpsLayer, ErrorStack> {
-        ssl.set_session_cache_mode(SslSessionCacheMode::OFF);
-
-        Ok(HttpsLayer {
-            inner: Inner {
-                ssl: ssl.build(),
-                cache: None,
                 callback: None,
                 ssl_callback: None,
             },
