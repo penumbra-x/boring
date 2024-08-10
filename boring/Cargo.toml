@@ -1,5 +1,5 @@
 [package]
-name = "boring-imp"
+name = "boring-patch"
 version = { workspace = true }
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 license = "Apache-2.0"
