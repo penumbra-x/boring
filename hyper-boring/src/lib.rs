@@ -83,6 +83,7 @@ impl Inner {
 }
 
 /// A layer which wraps services in an `HttpsConnector`.
+#[derive(Clone)]
 pub struct HttpsLayer {
     inner: Inner,
 }
@@ -245,6 +246,14 @@ where
     S::Future: Unpin + Send + 'static,
     T: AsyncRead + AsyncWrite + Connection + Unpin + Debug + Sync + Send + 'static,
 {
+    /// Creates a new `HttpsConnector` with a given `HttpConnector`
+    pub fn with_connector_layer(http: S, layer: HttpsLayer) -> HttpsConnector<S> {
+        HttpsConnector {
+            http,
+            inner: layer.inner,
+        }
+    }
+
     /// Creates a new `HttpsConnector`.
     ///
     /// The session cache configuration of `ssl` will be overwritten.
