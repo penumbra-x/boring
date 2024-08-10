@@ -40,7 +40,7 @@ fn key_index() -> Result<Index<Ssl, SessionKey>, ErrorStack> {
 #[derive(Clone)]
 struct Inner {
     ssl: SslConnector,
-    cache: Arc<Mutex<SessionCache>>,
+    cache: Option<Arc<Mutex<SessionCache>>>,
     callback: Option<Callback>,
     ssl_callback: Option<SslCallback>,
 }
@@ -62,9 +62,11 @@ impl Inner {
             port: uri.port_u16().unwrap_or(443),
         };
 
-        if let Some(session) = self.cache.lock().get(&key) {
-            unsafe {
-                conf.set_session(&session)?;
+        if let Some(ref cache) = self.cache {
+            if let Some(session) = cache.lock().get(&key) {
+                unsafe {
+                    conf.set_session(&session)?;
+                }
             }
         }
 
@@ -166,7 +168,23 @@ impl HttpsLayer {
         Ok(HttpsLayer {
             inner: Inner {
                 ssl: ssl.build(),
-                cache,
+                cache: Some(cache),
+                callback: None,
+                ssl_callback: None,
+            },
+        })
+    }
+
+    /// Creates a new `HttpsLayer` and disables session caching.
+    pub fn with_connector_and_no_cache(
+        mut ssl: SslConnectorBuilder,
+    ) -> Result<HttpsLayer, ErrorStack> {
+        ssl.set_session_cache_mode(SslSessionCacheMode::OFF);
+
+        Ok(HttpsLayer {
+            inner: Inner {
+                ssl: ssl.build(),
+                cache: None,
                 callback: None,
                 ssl_callback: None,
             },
