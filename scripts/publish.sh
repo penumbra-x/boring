@@ -17,7 +17,7 @@ if [[ "$(git diff --stat)" != '' ]]; then
 fi
 
 echo "===  Publishing boring-sys... ==="
-(cd boring-sys && cargo publish --no-verify)
+(cd boring-sys && cargo publish)
 sleep 20
 
 echo "===  Publishing boring... ==="
