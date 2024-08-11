@@ -1,5 +1,5 @@
 [package]
-name = "boring-sys-patch"
+name = "rboring-sys"
 version = { workspace = true }
 authors = ["Alex Crichton <alex@alexcrichton.com>",
            "Steven Fackler <sfackler@gmail.com>",

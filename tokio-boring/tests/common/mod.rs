@@ -10,7 +10,7 @@ use std::pin::Pin;
 use tokio::io::{AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_boring::{HandshakeError, SslStream};
-use tokio_boring_patch as tokio_boring;
+use tokio_rboring as tokio_boring;
 
 pub(crate) fn create_server(
     setup: impl FnOnce(&mut SslAcceptorBuilder),
