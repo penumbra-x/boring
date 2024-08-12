@@ -1,6 +1,7 @@
 //! Hyper SSL support via OpenSSL.
 #![warn(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+
 use crate::cache::{SessionCache, SessionKey};
 use antidote::Mutex;
 use boring::error::ErrorStack;
@@ -40,7 +41,7 @@ fn key_index() -> Result<Index<Ssl, SessionKey>, ErrorStack> {
 #[derive(Clone)]
 struct Inner {
     ssl: SslConnector,
-    cache: Option<Arc<Mutex<SessionCache>>>,
+    cache: Arc<Mutex<SessionCache>>,
     callback: Option<Callback>,
     ssl_callback: Option<SslCallback>,
 }
@@ -62,11 +63,9 @@ impl Inner {
             port: uri.port_u16().unwrap_or(443),
         };
 
-        if let Some(ref cache) = self.cache {
-            if let Some(session) = cache.lock().get(&key) {
-                unsafe {
-                    conf.set_session(&session)?;
-                }
+        if let Some(session) = self.cache.lock().get(&key) {
+            unsafe {
+                conf.set_session(&session)?;
             }
         }
 
@@ -84,7 +83,6 @@ impl Inner {
 }
 
 /// A layer which wraps services in an `HttpsConnector`.
-#[derive(Clone)]
 pub struct HttpsLayer {
     inner: Inner,
 }
@@ -92,7 +90,6 @@ pub struct HttpsLayer {
 /// Settings for [`HttpsLayer`]
 pub struct HttpsLayerSettings {
     session_cache_capacity: usize,
-    session_cache_mode: Option<SslSessionCacheMode>,
 }
 
 impl HttpsLayerSettings {
@@ -106,7 +103,6 @@ impl Default for HttpsLayerSettings {
     fn default() -> Self {
         Self {
             session_cache_capacity: 8,
-            session_cache_mode: None,
         }
     }
 }
@@ -117,15 +113,8 @@ pub struct HttpsLayerSettingsBuilder(HttpsLayerSettings);
 impl HttpsLayerSettingsBuilder {
     /// Sets maximum number of sessions to cache. Session capacity is per session key (domain).
     /// Defaults to 8.
-    pub fn session_cache_capacity(mut self, capacity: usize) -> Self {
+    pub fn set_session_cache_capacity(&mut self, capacity: usize) {
         self.0.session_cache_capacity = capacity;
-        self
-    }
-
-    /// Sets the session cache mode. Defaults to `SslSessionCacheMode::CLIENT`.
-    pub fn session_cache_mode(mut self, mode: SslSessionCacheMode) -> Self {
-        self.0.session_cache_mode = Some(mode);
-        self
     }
 
     /// Consumes the builder, returning a new [`HttpsLayerSettings`]
@@ -162,11 +151,7 @@ impl HttpsLayer {
             settings.session_cache_capacity,
         )));
 
-        ssl.set_session_cache_mode(
-            settings
-                .session_cache_mode
-                .unwrap_or_else(|| SslSessionCacheMode::CLIENT),
-        );
+        ssl.set_session_cache_mode(SslSessionCacheMode::CLIENT);
 
         ssl.set_new_session_callback({
             let cache = cache.clone();
@@ -180,7 +165,7 @@ impl HttpsLayer {
         Ok(HttpsLayer {
             inner: Inner {
                 ssl: ssl.build(),
-                cache: Some(cache),
+                cache,
                 callback: None,
                 ssl_callback: None,
             },
@@ -249,14 +234,6 @@ where
     S::Future: Unpin + Send + 'static,
     T: AsyncRead + AsyncWrite + Connection + Unpin + Debug + Sync + Send + 'static,
 {
-    /// Creates a new `HttpsConnector` with a given `HttpConnector`
-    pub fn with_connector_layer(http: S, layer: HttpsLayer) -> HttpsConnector<S> {
-        HttpsConnector {
-            http,
-            inner: layer.inner,
-        }
-    }
-
     /// Creates a new `HttpsConnector`.
     ///
     /// The session cache configuration of `ssl` will be overwritten.
@@ -265,22 +242,6 @@ where
         ssl: SslConnectorBuilder,
     ) -> Result<HttpsConnector<S>, ErrorStack> {
         HttpsLayer::with_connector(ssl).map(|l| l.layer(http))
-    }
-
-    /// Creates a new `HttpsConnector` with settings
-    ///
-    /// The session cache configuration of `ssl` will be overwritten.
-    pub fn with_connector_and_settings(
-        http: S,
-        ssl: SslConnectorBuilder,
-        settings: HttpsLayerSettings,
-    ) -> Result<HttpsConnector<S>, ErrorStack> {
-        HttpsLayer::with_connector_and_settings(ssl, settings).map(|l| l.layer(http))
-    }
-
-    /// Configures the SSL context for a given URI.
-    pub fn setup_ssl(&self, uri: &Uri, host: &str) -> Result<Ssl, ErrorStack> {
-        self.inner.setup_ssl(uri, host)
     }
 
     /// Registers a callback which can customize the configuration of each connection.
