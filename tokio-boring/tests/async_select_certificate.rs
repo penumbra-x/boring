@@ -1,3 +1,5 @@
+use tokio_rboring as tokio_boring;
+
 use boring::ssl::ClientHello;
 use futures::future;
 use tokio::task::yield_now;

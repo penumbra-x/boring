@@ -1,3 +1,5 @@
+use tokio_rboring as tokio_boring;
+
 use boring::hash::MessageDigest;
 use boring::pkey::PKey;
 use boring::rsa::Padding;

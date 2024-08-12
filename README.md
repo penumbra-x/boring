@@ -2,6 +2,8 @@
 
 [![crates.io](https://img.shields.io/crates/v/boring.svg)](https://crates.io/crates/boring)
 
+This project is forked from cloudflare [boring](https://github.com/cloudflare/boring)
+
 BoringSSL bindings for the Rust programming language and TLS adapters for [tokio](https://github.com/tokio-rs/tokio)
 and [hyper](https://github.com/hyperium/hyper) built on top of it.
 

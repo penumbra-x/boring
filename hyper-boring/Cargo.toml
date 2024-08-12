@@ -1,5 +1,5 @@
 [package]
-name = "hyper-boring"
+name = "hyper-rboring"
 version = { workspace = true }
 authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.com>"]
 edition = { workspace = true }

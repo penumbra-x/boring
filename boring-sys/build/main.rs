@@ -481,6 +481,9 @@ fn ensure_patches_applied(config: &Config) -> io::Result<()> {
         run_command(Command::new("git").arg("init").current_dir(src_path))?;
     }
 
+    println!("cargo:warning=applying old ciphers patch to boringssl");
+    apply_patch(config, "boringssl-old-ciphers.patch")?;
+
     if config.features.pq_experimental {
         println!("cargo:warning=applying experimental post quantum crypto patch to boringssl");
         apply_patch(config, "boring-pq.patch")?;
@@ -501,11 +504,7 @@ fn ensure_patches_applied(config: &Config) -> io::Result<()> {
 
 fn apply_patch(config: &Config, patch_name: &str) -> io::Result<()> {
     let src_path = get_boringssl_source_path(config);
-    let cmd_path = config
-        .manifest_dir
-        .join("patches")
-        .join(patch_name)
-        .canonicalize()?;
+    let cmd_path = config.manifest_dir.join("patches").join(patch_name);
 
     let mut args = vec!["apply", "-v", "--whitespace=fix"];
 

@@ -1,3 +1,5 @@
+use tokio_rboring as tokio_boring;
+
 use boring::ssl::{SslOptions, SslRef, SslSession, SslSessionCacheMode, SslVersion};
 use futures::future;
 use std::sync::atomic::{AtomicBool, Ordering};
