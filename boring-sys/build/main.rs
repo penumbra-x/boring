@@ -504,6 +504,14 @@ fn ensure_patches_applied(config: &Config) -> io::Result<()> {
 
 fn apply_patch(config: &Config, patch_name: &str) -> io::Result<()> {
     let src_path = get_boringssl_source_path(config);
+    #[cfg(not(windows))]
+    let cmd_path = config
+        .manifest_dir
+        .join("patches")
+        .join(patch_name)
+        .canonicalize()?;
+
+    #[cfg(windows)]
     let cmd_path = config.manifest_dir.join("patches").join(patch_name);
 
     let mut args = vec!["apply", "-v", "--whitespace=fix"];
@@ -683,6 +691,7 @@ fn main() {
     });
 
     let mut builder = bindgen::Builder::default()
+        .rust_target(bindgen::RustTarget::Stable_1_68) // bindgen MSRV is 1.70, so this is enough
         .derive_copy(true)
         .derive_debug(true)
         .derive_default(true)
