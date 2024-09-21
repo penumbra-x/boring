@@ -19,9 +19,9 @@ tag-prefix = ""
 publish = false
 
 [workspace.dependencies]
-boring-sys = { version = "4.10.2", path = "./rboring-sys" }
-boring = { version = "4.10.2", path = "./rboring" }
-tokio-boring = { version = "4.10.2", path = "./rtokio-boring" }
+boring-sys = { package = "rboring-sys", version = "4.10.2", path = "./boring-sys" }
+boring = { package = "rboring", version = "4.10.2", path = "./boring" }
+tokio-boring = { package = "tokio-rboring", version = "4.10.2", path = "./tokio-boring" }
 
 bindgen = { version = "0.70.1", default-features = false, features = ["runtime"] }
 bytes = "1"
