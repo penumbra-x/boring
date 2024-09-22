@@ -5,7 +5,7 @@ authors = ["Steven Fackler <sfackler@gmail.com>", "Ivan Nikulin <ifaaan@gmail.co
 license = "Apache-2.0"
 description = "BoringSSL bindings"
 repository = { workspace = true }
-documentation = "https://docs.rs/boring"
+documentation = "https://docs.rs/rboring"
 readme = "README.md"
 keywords = ["crypto", "tls", "ssl", "dtls"]
 categories = ["cryptography", "api-bindings"]
